@@ -270,8 +270,7 @@ def test_sync_provider_runs_off_the_event_loop(monkeypatch):
             request = asyncio.create_task(
                 client.post("/v1/sync", headers=_auth_headers(), json=_request_payload())
             )
-            await asyncio.sleep(0.02)
-            assert provider.started.is_set()
+            assert await asyncio.to_thread(provider.started.wait, 1)
             assert not request.done()
             provider.release.set()
             response = await request

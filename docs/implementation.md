@@ -7,7 +7,7 @@ Cada fase deve terminar verde antes da seguinte. Nenhuma fase publica, implanta 
 Arquivos principais:
 
 - `pyproject.toml`
-- `aquario_sigaa_connector/contracts.py`
+- `src/aquario_sigaa_connector/contracts.py`
 - `scripts/verify_architecture.py`
 
 Trabalho:
@@ -27,8 +27,8 @@ Prova runtime: validar request/response com matrícula esperada presente, ausent
 
 Arquivos principais:
 
-- `aquario_sigaa_connector/service.py`
-- `aquario_sigaa_connector/errors.py`
+- `src/aquario_sigaa_connector/service.py`
+- `src/aquario_sigaa_connector/errors.py`
 - `tests/test_service.py`
 
 Trabalho:
@@ -46,7 +46,7 @@ Prova runtime: mocks do cliente comprovam ordem, fechamento e classificação de
 
 Arquivos principais:
 
-- `aquario_sigaa_connector/app.py`
+- `src/aquario_sigaa_connector/app.py`
 - `api/index.py`
 - `vercel.json`
 

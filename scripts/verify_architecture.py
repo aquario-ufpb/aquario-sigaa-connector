@@ -120,7 +120,7 @@ def _verify_sigaa_client_boundary() -> None:
                 alias.name.endswith(".SigaaClient") for alias in node.names
             ):
                 importers.append((path.relative_to(ROOT), None))
-    expected = [(Path("aquario_sigaa_connector/service.py"), "sigaa.client")]
+    expected = [(Path("src/aquario_sigaa_connector/service.py"), "sigaa.client")]
     if importers != expected:
         raise AssertionError(f"SigaaClient must be imported only by service.py: {importers}")
 
