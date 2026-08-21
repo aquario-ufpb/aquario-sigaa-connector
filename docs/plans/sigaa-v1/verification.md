@@ -1,0 +1,77 @@
+# Estratégia de verificação
+
+## Conector
+
+Comandos esperados:
+
+```powershell
+python scripts/verify_architecture.py
+ruff check .
+ruff format --check .
+pytest
+python -c "from api.index import app; print(app.title)"
+```
+
+Casos obrigatórios:
+
+- credenciais corretas e snapshot completo;
+- credenciais inválidas sem mensagem bruta;
+- matrícula igual, divergente e esperada ausente;
+- identidade vazia, timeout, `AuthError` e HTML incompatível;
+- cliente fechado em sucesso e em toda falha;
+- `SecretStr`, logs e resposta sem senha;
+- revisão instalada igual ao SHA do pacote PucaVaz;
+- repositório upstream igual à URL HTTPS canônica do PucaVaz;
+- campos extras rejeitados em todos os níveis e limites de strings/listas aplicados;
+- nenhuma pasta ou import de parser copiado.
+
+## Aquário
+
+Comandos esperados:
+
+```powershell
+npm run check-all
+npm run test
+npm run test:integration
+npm run build
+```
+
+Casos obrigatórios:
+
+- cache privado não atravessa logout ou troca de conta;
+- beta, consentimento e reautenticação falham antes de chamar o conector;
+- request com credenciais não é repetido automaticamente;
+- mesma idempotency key é reservada antes da rede e não abre uma segunda sessão;
+- lease vencido ou geração antiga não consegue instalar resultado tardio;
+- matrícula nula é reivindicada na mesma transação do snapshot;
+- matrícula de outra conta, curso sem alias e curso divergente bloqueiam sem vazar identidade;
+- idempotência e lease impedem duplicidade/conflito concorrente;
+- falha mantém o último snapshot válido;
+- tabelas manuais não mudam durante sync, desconexão ou exclusão;
+- conflito de fontes mostra SIGAA e preserva manual;
+- resposta privada usa `Cache-Control: private, no-store`;
+- retenção remove metadados após 90 dias.
+- `synchronizedAt` vem do commit no banco e não do relógio do navegador ou conector.
+
+## Segurança e privacidade
+
+- Buscar matrícula, senha de teste, cookies, HTML e PDF em logs capturados.
+- Confirmar que PostHog não autocaptura nem grava a tela de credenciais e dados acadêmicos.
+- Testar usuário A contra todas as rotas de usuário B, inclusive por parâmetros extras.
+- Testar payloads grandes, campos extras, versões desconhecidas e URL manipulada.
+- Confirmar que segredo e URL do conector nunca chegam ao bundle do navegador.
+- Confirmar rotação do bearer por ambiente e comparação constante no conector.
+- Confirmar que preview não possui segredos reais e staging não contém snapshots de produção.
+- Confirmar que o plano/região Vercel aceita os tetos configurados e observar um timeout real de 150 segundos em ambiente não produtivo.
+
+## Validação real da beta
+
+1. Ativar `sigaa:beta` somente para a conta de teste.
+2. Conectar em staging isolado ou ambiente beta aprovado.
+3. Comparar cada grupo de dados com a tela oficial do SIGAA.
+4. Forçar uma falha após existir snapshot e verificar preservação.
+5. Fazer logout, entrar em outra conta e confirmar ausência de dados anteriores.
+6. Desconectar e depois excluir os importados, validando as diferenças.
+7. Inspecionar banco, logs e analytics em busca de dados proibidos.
+
+Código verde sem esse smoke autenticado não conclui a beta.

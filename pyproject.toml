@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aquario-sigaa-connector"
+version = "0.1.0"
+description = "Private HTTP bridge between Aquario and SIGAA UFPB"
+readme = "README.md"
+requires-python = ">=3.12,<3.15"
+license = "MIT"
+authors = [{ name = "Aquario contributors" }]
+dependencies = [
+  "fastapi>=0.116,<1",
+  "httpx>=0.27,<1",
+  "pydantic>=2.11,<3",
+  "sigaa-ai-agent @ git+https://github.com/PucaVaz/sigaa-for-ai-agents.git@6ba8d2dd4ef19bdc2d58b22fc039e9a078bb2298",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8,<9",
+  "pytest-cov>=6,<7",
+  "ruff>=0.12,<1",
+  "uvicorn>=0.35,<1",
+]
+
+[tool.setuptools.packages.find]
+include = ["aquario_sigaa_connector*"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-markers --strict-config"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106"]
