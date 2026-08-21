@@ -122,21 +122,6 @@ Execute os gates antes de criar um commit:
 
 O verificador confirma o pin upstream, a proveniência instalada ou incluída no bundle, a ausência de parsers locais, os contratos fechados, as rotas públicas e os limites da Vercel.
 
-## Publicar na Vercel
-
-Crie um projeto Vercel separado com o preset **Other** e mantenha o diretório raiz em `./`. O ambiente Python reconhece o `pyproject.toml` e a entrada `api/index.py`.
-
-Antes do deploy:
-
-1. Cadastre `CONNECTOR_API_SECRET` em Preview e Production
-2. Confirme que Fluid Compute está ativo
-3. Preserve o `maxDuration` de 150s definido em `vercel.json`
-4. Faça o deploy da branch desejada
-5. Confirme que `GET /health` retorna `200`
-6. Consulte os Runtime Logs antes de promover o deployment
-
-Abortar a requisição HTTP encerra apenas a espera do cliente. O trabalho síncrono aceito pode continuar até o limite da função, portanto o serviço não promete cancelamento imediato nem logout remoto após desconexão do navegador.
-
 ## Segurança e privacidade
 
 Ao contribuir, preserve estas invariantes:
