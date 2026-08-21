@@ -201,11 +201,14 @@ def _verify_http_and_execution() -> None:
     duration = vercel["functions"]["api/index.py"]["maxDuration"]
     if duration != 150:
         raise AssertionError("Vercel maxDuration must equal 150")
+    include_files = vercel["functions"]["api/index.py"].get("includeFiles")
+    if include_files != "pyproject.toml":
+        raise AssertionError("Vercel must bundle pyproject.toml for provenance fallback")
 
 
 def main() -> int:
     checks = (
-        ("upstream pin and PEP 610 provenance", _verify_pin_and_provenance),
+        ("upstream pin and runtime provenance", _verify_pin_and_provenance),
         ("no vendored or direct parser access", _verify_no_parser_ownership),
         ("single SigaaClient adapter boundary", _verify_sigaa_client_boundary),
         ("recursively strict and bounded contracts", _verify_contract_schemas),

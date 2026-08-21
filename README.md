@@ -41,7 +41,7 @@ tests/                       Testes unitários e testes HTTP sobre ASGI
 
 O projeto não copia parsers ou regras de navegação do SIGAA. Ele instala [`sigaa-for-ai-agents`](https://github.com/PucaVaz/sigaa-for-ai-agents), criado por Puca Vaz, diretamente do GitHub por um commit completo fixado em `pyproject.toml`.
 
-O ambiente de execução lê a revisão instalada pelos metadados da [Python Enhancement Proposal (PEP) 610](https://peps.python.org/pep-0610/). O verificador arquitetural rejeita divergências, URLs alternativas e imports diretos de `sigaa.parsers`.
+O ambiente de execução lê a revisão instalada pelos metadados da [Python Enhancement Proposal (PEP) 610](https://peps.python.org/pep-0610/). Quando a Vercel remove esse metadado do bundle, o conector deriva a mesma revisão do `pyproject.toml` incluído na função. O verificador arquitetural rejeita divergências, URLs alternativas e imports diretos de `sigaa.parsers`.
 
 Consulte [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) para os créditos e a licença preservada.
 
@@ -120,7 +120,7 @@ Execute os gates antes de criar um commit:
 .\.venv\Scripts\pytest.exe -q
 ```
 
-O verificador confirma o pin upstream, a proveniência PEP 610, a ausência de parsers locais, os contratos fechados, as rotas públicas e os limites da Vercel.
+O verificador confirma o pin upstream, a proveniência instalada ou incluída no bundle, a ausência de parsers locais, os contratos fechados, as rotas públicas e os limites da Vercel.
 
 ## Publicar na Vercel
 

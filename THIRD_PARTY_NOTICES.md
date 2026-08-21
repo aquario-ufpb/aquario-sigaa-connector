@@ -7,7 +7,7 @@ created by **Puca Vaz**, for SIGAA authentication, HTTP session handling, domain
 and parsing.
 
 - Upstream repository: https://github.com/PucaVaz/sigaa-for-ai-agents
-- Revision: pinned in `pyproject.toml` and reported at runtime from PEP 610 metadata
+- Revision: pinned in `pyproject.toml` and reported from PEP 610 or the bundled project pin
 - License: MIT
 - Copyright: Copyright (c) 2026 Puca Vaz
 

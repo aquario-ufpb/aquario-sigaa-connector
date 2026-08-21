@@ -13,7 +13,7 @@ Arquivos principais:
 Trabalho:
 
 - Tornar `expected_matricula` anulável.
-- Deixar o SHA fixado em `pyproject.toml` como única fonte manual e derivar a revisão instalada por PEP 610.
+- Deixar o SHA fixado em `pyproject.toml` como única fonte manual e derivar a revisão por PEP 610 ou pelo pin incluído no bundle Vercel.
 - Definir `CurriculumV1` por completo, incluindo CRA, cargas horárias, percentuais, contagens e componentes.
 - Aplicar `extra="forbid"` recursivamente e limites explícitos para corpo, strings e listas.
 - Fixar a identidade upstream ao repositório HTTPS canônico do PucaVaz e validar a mesma constante no Aquário.

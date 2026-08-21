@@ -7,7 +7,7 @@
 - Três conceitos persistidos: vínculo, último snapshot e tentativas seguras.
 - JWT separado de reautenticação, finalidade SIGAA, duração de 15 minutos.
 - Bearer server-only sobre HTTPS.
-- SHA manual somente no `pyproject.toml`, revisão runtime derivada por PEP 610.
+- SHA manual somente no `pyproject.toml`, revisão runtime derivada por PEP 610 ou pelo pin incluído no bundle Vercel.
 - Reserva de idempotência e lease com geração antes do I/O externo.
 
 Ela é adequada à beta porque não cria armazenamento de credencial, fila, polling, replay store, geração cruzada ou tabela adicional de concessões.
@@ -24,7 +24,7 @@ O JWT pode ser reutilizado durante a janela de 15 minutos e o bearer pode ser re
 Partes reaproveitadas dessa opção:
 
 - verificar digest/versão do contrato;
-- gerar metadados de build a partir do pin, caso PEP 610 não esteja disponível no runtime Vercel;
+- incluir o `pyproject.toml` no bundle e derivar metadados de build do pin quando PEP 610 não estiver disponível no runtime Vercel;
 - considerar concessão de uso único se a beta mostrar necessidade de revogação imediata;
 - manter assinatura HMAC como endurecimento futuro se o conector tiver mais consumidores.
 
