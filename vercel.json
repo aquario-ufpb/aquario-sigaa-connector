@@ -3,6 +3,7 @@
   "functions": {
     "api/index.py": {
       "maxDuration": 150,
+      "includeFiles": "pyproject.toml",
       "excludeFiles": "{tests/**,**/test_*.py,.pytest_cache/**,.ruff_cache/**}"
     }
   },

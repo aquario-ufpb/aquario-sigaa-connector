@@ -1,13 +1,48 @@
+# Secrets and local configuration
 .env
 .env.*
 !.env.example
+
+# Python environments
+.venv/
+venv/
+env/
+
+# Python bytecode and tooling
+__pycache__/
+*.py[cod]
+*$py.class
 .pytest_cache/
 .ruff_cache/
-.venv/
-__pycache__/
+.mypy_cache/
+.pyright/
+.tox/
+.nox/
+
+# Packaging and build output
 *.egg-info/
-*.py[cod]
-.vercel/
-.audit/
+.eggs/
+build/
+dist/
+
+# Coverage and reports
+.coverage
+.coverage.*
 coverage.xml
 htmlcov/
+
+# Deployment and local audit state
+.vercel/
+.audit/
+
+# Editors
+.idea/
+.vscode/
+*.suo
+*.swp
+*.tmp
+
+# Operating systems
+.DS_Store
+Thumbs.db
+Desktop.ini

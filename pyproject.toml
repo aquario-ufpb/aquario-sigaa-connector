@@ -21,11 +21,13 @@ dependencies = [
 dev = [
   "pytest>=8,<9",
   "pytest-cov>=6,<7",
+  "python-dotenv>=1,<2",
   "ruff>=0.12,<1",
   "uvicorn>=0.35,<1",
 ]
 
 [tool.setuptools.packages.find]
+where = ["src"]
 include = ["aquario_sigaa_connector*"]
 
 [tool.pytest.ini_options]

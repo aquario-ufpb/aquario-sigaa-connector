@@ -7,13 +7,13 @@ Cada fase deve terminar verde antes da seguinte. Nenhuma fase publica, implanta 
 Arquivos principais:
 
 - `pyproject.toml`
-- `aquario_sigaa_connector/contracts.py`
+- `src/aquario_sigaa_connector/contracts.py`
 - `scripts/verify_architecture.py`
 
 Trabalho:
 
 - Tornar `expected_matricula` anulável.
-- Deixar o SHA fixado em `pyproject.toml` como única fonte manual e derivar a revisão instalada por PEP 610.
+- Deixar o SHA fixado em `pyproject.toml` como única fonte manual e derivar a revisão por PEP 610 ou pelo pin incluído no bundle Vercel.
 - Definir `CurriculumV1` por completo, incluindo CRA, cargas horárias, percentuais, contagens e componentes.
 - Aplicar `extra="forbid"` recursivamente e limites explícitos para corpo, strings e listas.
 - Fixar a identidade upstream ao repositório HTTPS canônico do PucaVaz e validar a mesma constante no Aquário.
@@ -27,8 +27,8 @@ Prova runtime: validar request/response com matrícula esperada presente, ausent
 
 Arquivos principais:
 
-- `aquario_sigaa_connector/service.py`
-- `aquario_sigaa_connector/errors.py`
+- `src/aquario_sigaa_connector/service.py`
+- `src/aquario_sigaa_connector/errors.py`
 - `tests/test_service.py`
 
 Trabalho:
@@ -46,7 +46,7 @@ Prova runtime: mocks do cliente comprovam ordem, fechamento e classificação de
 
 Arquivos principais:
 
-- `aquario_sigaa_connector/app.py`
+- `src/aquario_sigaa_connector/app.py`
 - `api/index.py`
 - `vercel.json`
 

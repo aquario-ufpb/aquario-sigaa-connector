@@ -10,7 +10,9 @@ from pydantic import SecretStr
 from sigaa.documents import AcademicDocumentError
 from sigaa.http import AuthError
 
+from aquario_sigaa_connector import service
 from aquario_sigaa_connector.errors import ConnectorError, FailureKind
+from aquario_sigaa_connector.provenance import ProvenanceError
 from aquario_sigaa_connector.service import PucaVazSyncProvider, SyncCommand
 
 USERNAME = "20260000001"
@@ -248,3 +250,19 @@ def test_sync_command_repr_redacts_password():
 
     assert PASSWORD not in repr(command)
     assert "**********" in repr(command)
+
+
+def test_missing_runtime_provenance_fails_safe_before_creating_client(monkeypatch):
+    events: list[str] = []
+
+    def unavailable_provenance():
+        raise ProvenanceError("private build detail")
+
+    monkeypatch.setattr(service, "read_upstream_provenance", unavailable_provenance)
+
+    with pytest.raises(ConnectorError) as error:
+        _provider(FakeClient(events)).synchronize(_command())
+
+    assert error.value.kind is FailureKind.CONNECTOR_MISCONFIGURED
+    assert "private build detail" not in str(error.value)
+    assert events == []

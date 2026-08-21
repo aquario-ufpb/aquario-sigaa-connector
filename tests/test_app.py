@@ -9,6 +9,7 @@ from threading import Event, Lock
 import httpx
 from fastapi.routing import APIRoute
 
+from aquario_sigaa_connector import service
 from aquario_sigaa_connector.app import MAX_REQUEST_BODY_BYTES, create_app
 from aquario_sigaa_connector.contracts import SyncResponse
 from aquario_sigaa_connector.execution import BoundedSyncExecutor
@@ -103,6 +104,21 @@ def test_app_exposes_only_health_and_sync_without_docs():
     assert application.openapi_url is None
 
 
+def test_health_does_not_require_upstream_provenance_at_startup(monkeypatch):
+    def unavailable_provenance():
+        raise AssertionError("health loaded upstream provenance")
+
+    monkeypatch.setattr(service, "read_upstream_provenance", unavailable_provenance)
+    application = create_app()
+    executor = application.state.sync_executor
+
+    response = _asgi_request(application, "GET", "/health")
+
+    assert response.status_code == 200
+    _assert_security_headers(response)
+    executor.shutdown()
+
+
 def test_every_response_gets_fresh_server_headers(monkeypatch):
     monkeypatch.setenv("CONNECTOR_API_SECRET", SECRET)
     application = create_app(executor=ImmediateExecutor())
@@ -148,7 +164,6 @@ def test_sync_rejects_non_ascii_bearer_as_unauthorized(monkeypatch):
 
     assert response.status_code == 401
     assert response.json()["error"]["code"] == "UNAUTHORIZED"
-    _assert_security_headers(response)
     _assert_security_headers(response)
 
 
@@ -270,8 +285,7 @@ def test_sync_provider_runs_off_the_event_loop(monkeypatch):
             request = asyncio.create_task(
                 client.post("/v1/sync", headers=_auth_headers(), json=_request_payload())
             )
-            await asyncio.sleep(0.02)
-            assert provider.started.is_set()
+            assert await asyncio.to_thread(provider.started.wait, 1)
             assert not request.done()
             provider.release.set()
             response = await request
