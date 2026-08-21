@@ -2,6 +2,8 @@
 
 Este serviço conecta o backend do Aquário ao Sistema Integrado de Gestão de Atividades Acadêmicas (SIGAA) da Universidade Federal da Paraíba (UFPB). Ele autentica uma requisição privada, consulta os dados acadêmicos e devolve um snapshot normalizado sem armazenar credenciais, cookies, HTML ou arquivos PDF.
 
+Este conector utiliza o projeto [`sigaa-for-ai-agents`](https://github.com/PucaVaz/sigaa-for-ai-agents), criado por [Puca Vaz](https://github.com/PucaVaz), como base para autenticação, navegação e interpretação dos dados do SIGAA.
+
 > [!IMPORTANT]
 > Esta integração não é oficial e não possui vínculo, suporte ou endosso da UFPB ou do SIGAA.
 
