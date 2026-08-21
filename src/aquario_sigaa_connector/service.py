@@ -6,6 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from decimal import Decimal
+from threading import Lock
 from typing import Any, Protocol
 
 import httpx
@@ -28,7 +29,7 @@ from .contracts import (
     WorkloadProgressV1,
 )
 from .errors import ConnectorError, FailureKind
-from .provenance import UpstreamProvenance, read_upstream_provenance
+from .provenance import ProvenanceError, UpstreamProvenance, read_upstream_provenance
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,11 +52,13 @@ class PucaVazSyncProvider:
         clock: Callable[[], datetime] | None = None,
     ) -> None:
         self._client_factory = client_factory
-        self._provenance = provenance or read_upstream_provenance()
+        self._provenance = provenance
+        self._provenance_lock = Lock()
         self._clock = clock or (lambda: datetime.now(UTC))
 
     def synchronize(self, command: SyncCommand) -> SyncResponse:
         try:
+            provenance = self._installed_provenance()
             client = self._client_factory(command.username, command.password.get_secret_value())
             with client:
                 student = client.get_student()
@@ -70,6 +73,7 @@ class PucaVazSyncProvider:
                 grades = client.get_grades()
                 classes = client.list_turmas()
                 return self._build_response(
+                    provenance=provenance,
                     student=student_data,
                     curriculum=curriculum,
                     grades=grades,
@@ -95,9 +99,22 @@ class PucaVazSyncProvider:
         except (AttributeError, KeyError, TypeError, ValidationError) as exc:
             raise ConnectorError(FailureKind.SIGAA_RESPONSE_INVALID) from exc
 
+    def _installed_provenance(self) -> UpstreamProvenance:
+        if self._provenance is not None:
+            return self._provenance
+
+        with self._provenance_lock:
+            if self._provenance is None:
+                try:
+                    self._provenance = read_upstream_provenance()
+                except ProvenanceError as exc:
+                    raise ConnectorError(FailureKind.CONNECTOR_MISCONFIGURED) from exc
+            return self._provenance
+
     def _build_response(
         self,
         *,
+        provenance: UpstreamProvenance,
         student: StudentData,
         curriculum: Any,
         grades: Any,
@@ -124,8 +141,8 @@ class PucaVazSyncProvider:
         return SyncResponse(
             observed_at=self._clock(),
             source=SourceInfo(
-                upstream_repository=self._provenance.repository,
-                upstream_commit=self._provenance.commit_id,
+                upstream_repository=provenance.repository,
+                upstream_commit=provenance.commit_id,
             ),
             student=student,
             curriculum=CurriculumV1(
