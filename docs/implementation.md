@@ -222,8 +222,9 @@ Trabalho:
 - Mostrar crédito e link para PucaVaz. Informar que senha não é persistida e que a sessão local fecha ao fim; não prometer logout remoto nem limpeza de RAM.
 - Informar que “parar de esperar” não garante cancelamento e pode durar até três minutos.
 - Permitir fechar o diálogo durante a espera sem prometer cancelamento. Manter a operação em andamento e atualizar o estado quando a resposta chegar.
+- Medir abertura, início, sucesso, falha, proposta de troca de curso, confirmação, nova sincronização, desconexão e exclusão com eventos tipados. As propriedades ficam limitadas a enums e booleanos. Não enviar identidade SIGAA, matrícula, curso, componentes, notas, contagens, mensagem de erro ou credenciais.
 
-Prova estática: campos sensíveis com autocomplete adequado. Card, diálogos e página acadêmica usam seletores reconhecidos pela versão instalada do PostHog para bloquear autocapture e session replay.
+Prova estática: campos sensíveis com autocomplete adequado. Card, diálogos e página acadêmica usam seletores reconhecidos pela versão instalada do PostHog para bloquear autocapture e session replay. A união tipada de eventos impede propriedades acadêmicas livres.
 
 Prova runtime: teste de navegador cobre dono, visitante, beta, consentimento informado, sucesso, erro, retry explícito, estado desconectado, estados vazios, notas e resultados, fechar durante sincronização, foco e anúncio de erros, bloqueio de analytics e troca de conta.
 
@@ -240,6 +241,7 @@ Trabalho:
 - Excluir diariamente tentativas com mais de 90 dias.
 - Não fornecer segredo de conector nem acesso SIGAA real a previews.
 - Impedir que o reset de staging copie snapshots acadêmicos de produção. Usar base isolada ou limpeza obrigatória antes do acesso.
+- Fazer o workflow falhar se não resolver o deployment exato ou se a API da Vercel não confirmar o alias de staging.
 - Validar os tetos de 150, 165 e 180 segundos no plano e região dos dois serviços. Hard kill pode impedir `finally`; a promessa pública continua limitada a não persistir nem reutilizar credenciais/sessão.
 
 Prova estática: ambientes têm política explícita de segredos e dados.

@@ -63,12 +63,14 @@ Casos obrigatórios:
 
 - Buscar matrícula, senha de teste, cookies, HTML e PDF em logs capturados.
 - Confirmar que PostHog não autocaptura nem grava a tela de credenciais e dados acadêmicos.
+- Confirmar que os eventos do fluxo SIGAA usam apenas nomes e propriedades tipados. Inspecionar cada captura e rejeitar identidade, matrícula, curso, componentes, notas, contagens, mensagens de erro e credenciais.
 - Testar usuário A contra todas as rotas de usuário B, inclusive por parâmetros extras.
 - Testar payloads grandes, campos extras, versões desconhecidas e URL manipulada.
 - Confirmar que segredo e URL do conector nunca chegam ao bundle do navegador.
 - Confirmar rotação do bearer por ambiente e comparação constante no conector.
 - Confirmar que preview não possui segredos reais e staging não contém snapshots de produção.
 - Confirmar que o plano/região Vercel aceita os tetos configurados e observar um timeout real de 150 segundos em ambiente não produtivo.
+- Forçar falha na resolução do deployment e na criação do alias. O workflow de staging deve falhar e não publicar um resumo de sucesso.
 
 ## Validação real da beta
 
