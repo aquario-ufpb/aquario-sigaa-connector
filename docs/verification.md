@@ -46,7 +46,8 @@ Casos obrigatórios:
 - matrícula nula é reivindicada na mesma transação do snapshot;
 - matrícula de outra conta e curso sem alias bloqueiam sem vazar identidade;
 - curso reconhecido e divergente não altera o perfil na primeira tentativa e devolve somente os dados necessários para a confirmação;
-- confirmação exige proposta pendente, reautenticação vinculada, novas credenciais, nova idempotency key e segunda consulta consistente;
+- confirmação exige proposta pendente, claim de reautenticação vinculado ao ID exato, novas credenciais, nova idempotency key e segunda consulta consistente;
+- duas confirmações concorrentes com chaves diferentes não podem substituir o perfil duas vezes; exatamente uma transição `PENDING` para `CONSUMED` vence;
 - proposta expirada, superada, concorrente ou ligada a identidade, matrícula, alias, consentimento ou destino alterado falha sem modificar perfil, snapshot ou dados manuais;
 - idempotência e lease impedem duplicidade/conflito concorrente;
 - falha mantém o último snapshot válido;

@@ -93,7 +93,7 @@ Trabalho:
 
 - Adicionar `SigaaConnection`, `SigaaAcademicSnapshot`, `SigaaSyncRun` e `SigaaCourseChangeProposal`.
 - Manter snapshot único por usuário, idempotência única, lease expirável com geração monotônica e códigos seguros.
-- Manter no máximo a proposta pendente efetiva por usuário. Vincular a proposta à tentativa inicial, identidade do perfil, matrícula esperada, curso reconhecido, versões de alias e consentimento e expiração curta. Não guardar credenciais nem o snapshot rejeitado.
+- Manter no máximo a proposta pendente efetiva por usuário. Vincular a proposta à tentativa inicial, token da identidade acadêmica exibida, matrícula esperada, valor bruto informado pelo SIGAA, curso de destino, token do catálogo de destino, versões de alias e consentimento e expiração curta. Não guardar credenciais nem o snapshot rejeitado.
 - Não criar campos para senha, cookie, HTML, PDF, ViewState ou erro bruto.
 - Criar índices para usuário, idempotência, lease e expiração de 90 dias.
 
@@ -141,12 +141,12 @@ Trabalho:
 - Gerar `synchronizedAt` pelo relógio do banco no commit e devolvê-lo na leitura privada.
 - Comparar `student.course` com `Usuario.curso.nome` por normalização determinística e aliases versionados.
 - Valor ausente do catálogo ou alias desconhecido falha fechado. Curso reconhecido, mas diferente do perfil, encerra a tentativa sem instalar o snapshot e devolve uma proposta temporária com curso e centro atuais, valor bruto do SIGAA e destino reconhecido.
-- Confirmar a proposta em uma operação separada. Exigir nova reautenticação vinculada ao ID da proposta, novas credenciais SIGAA, nova idempotency key e uma segunda consulta. O commit atômico substitui curso e centro e instala o snapshot somente se proposta, identidade acadêmica, matrícula, alias, consentimento e destino continuarem válidos.
+- Confirmar a proposta em uma operação separada. Exigir nova reautenticação com claim assinado que cite o ID exato da proposta, novas credenciais SIGAA, nova idempotency key e uma segunda consulta. O commit atômico substitui curso e centro, instala o snapshot e move condicionalmente a proposta de `PENDING` para `CONSUMED` somente se proposta, identidade acadêmica, matrícula, alias, consentimento e destino continuarem válidos. Confirmações concorrentes com chaves diferentes disputam a mesma transição e exatamente uma vence.
 - Preservar o snapshot anterior em qualquer falha.
 
 Prova estática: credenciais não aparecem em tipos de repositório ou logging.
 
-Prova runtime: mesma chave antes da rede, chaves concorrentes, lease vencido, resposta antiga tardia, matrícula nula, conflito de matrícula, curso desconhecido, proposta de troca de curso, proposta expirada ou superada, reautenticação de outra proposta, segunda consulta divergente, confirmação concorrente, resposta extra e timeout.
+Prova runtime: mesma chave antes da rede, chaves concorrentes, lease vencido, resposta antiga tardia, matrícula nula, conflito de matrícula, curso desconhecido, proposta de troca de curso, proposta expirada ou superada, reautenticação de outra proposta, segunda consulta divergente, duas confirmações concorrentes com chaves diferentes e exatamente uma vencedora, resposta extra e timeout.
 
 ## Fase 8. Expor sincronização e leitura privadas
 
