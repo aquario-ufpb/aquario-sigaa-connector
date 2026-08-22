@@ -21,3 +21,9 @@ Riscos aceitos para a V1:
 - JWT de reautenticação reutilizável por até 15 minutos, mitigado por claims estritos, memória transitória e rate limit;
 - bearer interno repetível em caso de vazamento, mitigado por HTTPS, segredo por ambiente, comparação constante e rotação;
 - hard kill pode impedir `finally`, então a interface não promete cancelamento, logout remoto ou limpeza imediata de memória.
+
+## Decisão posterior sobre curso divergente
+
+A regra original mantinha qualquer divergência de curso como falha fechada definitiva. O requisito de produto foi ampliado para permitir correção explícita do perfil quando o SIGAA retorna um curso reconhecido no catálogo.
+
+A primeira tentativa continua sem alterar o perfil nem instalar o snapshot. Ela cria uma proposta temporária sem credenciais. A confirmação mostra antes e depois, exige nova reautenticação vinculada à proposta, novas credenciais SIGAA e uma segunda consulta. O commit substitui curso e centro e instala o snapshot somente se a proposta e toda a identidade acadêmica continuarem válidas. Curso desconhecido ou proposta obsoleta continua falhando fechado.

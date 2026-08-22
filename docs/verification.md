@@ -44,7 +44,10 @@ Casos obrigatórios:
 - mesma idempotency key é reservada antes da rede e não abre uma segunda sessão;
 - lease vencido ou geração antiga não consegue instalar resultado tardio;
 - matrícula nula é reivindicada na mesma transação do snapshot;
-- matrícula de outra conta, curso sem alias e curso divergente bloqueiam sem vazar identidade;
+- matrícula de outra conta e curso sem alias bloqueiam sem vazar identidade;
+- curso reconhecido e divergente não altera o perfil na primeira tentativa e devolve somente os dados necessários para a confirmação;
+- confirmação exige proposta pendente, reautenticação vinculada, novas credenciais, nova idempotency key e segunda consulta consistente;
+- proposta expirada, superada, concorrente ou ligada a identidade, matrícula, alias, consentimento ou destino alterado falha sem modificar perfil, snapshot ou dados manuais;
 - idempotência e lease impedem duplicidade/conflito concorrente;
 - falha mantém o último snapshot válido;
 - tabelas manuais não mudam durante sync, desconexão ou exclusão;

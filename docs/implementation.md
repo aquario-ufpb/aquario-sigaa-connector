@@ -91,8 +91,9 @@ Arquivos principais:
 
 Trabalho:
 
-- Adicionar `SigaaConnection`, `SigaaAcademicSnapshot` e `SigaaSyncRun`.
+- Adicionar `SigaaConnection`, `SigaaAcademicSnapshot`, `SigaaSyncRun` e `SigaaCourseChangeProposal`.
 - Manter snapshot único por usuário, idempotência única, lease expirável com geração monotônica e códigos seguros.
+- Manter no máximo a proposta pendente efetiva por usuário. Vincular a proposta à tentativa inicial, identidade do perfil, matrícula esperada, curso reconhecido, versões de alias e consentimento e expiração curta. Não guardar credenciais nem o snapshot rejeitado.
 - Não criar campos para senha, cookie, HTML, PDF, ViewState ou erro bruto.
 - Criar índices para usuário, idempotência, lease e expiração de 90 dias.
 
@@ -138,12 +139,14 @@ Trabalho:
 - Fazer a chamada fora da transação.
 - Construir metadados da tentativa no Aquário a partir de relógio, outcome mapeado, contagens validadas, versão e revisão. O conector não retorna `safeMetadata`.
 - Gerar `synchronizedAt` pelo relógio do banco no commit e devolvê-lo na leitura privada.
-- Comparar `student.course` com `Usuario.curso.nome` por normalização determinística e aliases versionados. Valor desconhecido ou divergente falha fechado.
+- Comparar `student.course` com `Usuario.curso.nome` por normalização determinística e aliases versionados.
+- Valor ausente do catálogo ou alias desconhecido falha fechado. Curso reconhecido, mas diferente do perfil, encerra a tentativa sem instalar o snapshot e devolve uma proposta temporária com curso e centro atuais, valor bruto do SIGAA e destino reconhecido.
+- Confirmar a proposta em uma operação separada. Exigir nova reautenticação vinculada ao ID da proposta, novas credenciais SIGAA, nova idempotency key e uma segunda consulta. O commit atômico substitui curso e centro e instala o snapshot somente se proposta, identidade acadêmica, matrícula, alias, consentimento e destino continuarem válidos.
 - Preservar o snapshot anterior em qualquer falha.
 
 Prova estática: credenciais não aparecem em tipos de repositório ou logging.
 
-Prova runtime: mesma chave antes da rede, chaves concorrentes, lease vencido, resposta antiga tardia, matrícula nula, conflito de matrícula, curso divergente, resposta extra e timeout.
+Prova runtime: mesma chave antes da rede, chaves concorrentes, lease vencido, resposta antiga tardia, matrícula nula, conflito de matrícula, curso desconhecido, proposta de troca de curso, proposta expirada ou superada, reautenticação de outra proposta, segunda consulta divergente, confirmação concorrente, resposta extra e timeout.
 
 ## Fase 8. Expor sincronização e leitura privadas
 
@@ -211,6 +214,7 @@ Trabalho:
 
 - Exibir o card apenas ao dono beta, inclusive antes da primeira sincronização.
 - Criar consentimento, reautenticação, credenciais, progresso e resultado.
+- Em curso reconhecido e divergente, mostrar antes e depois, valor bruto do SIGAA e aviso irreversível. Exigir checkbox explícito, novas credenciais e nova senha do Aquário antes de confirmar. Voltar ao início quando a proposta expirar ou ficar obsoleta.
 - Manter senha e prova recente somente no estado transitório e limpar em `finally`.
 - Mostrar crédito e link para PucaVaz. Informar que senha não é persistida e que a sessão local fecha ao fim; não prometer logout remoto nem limpeza de RAM.
 - Informar que “parar de esperar” não garante cancelamento e pode durar até três minutos.
