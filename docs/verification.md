@@ -49,9 +49,11 @@ Casos obrigatórios:
 - confirmação exige proposta pendente, claim de reautenticação vinculado ao ID exato, novas credenciais, nova idempotency key e segunda consulta consistente;
 - duas confirmações concorrentes com chaves diferentes não podem substituir o perfil duas vezes; exatamente uma transição `PENDING` para `CONSUMED` vence;
 - proposta expirada, superada, concorrente ou ligada a identidade, matrícula, alias, consentimento ou destino alterado falha sem modificar perfil, snapshot ou dados manuais;
+- retry idempotente da confirmação depois do lease não fica ocupado com uma data passada;
 - idempotência e lease impedem duplicidade/conflito concorrente;
 - falha mantém o último snapshot válido;
 - tabelas manuais não mudam durante sync, desconexão ou exclusão;
+- componentes manuais do curso anterior continuam visíveis na projeção depois de uma troca de curso;
 - conflito de fontes mostra SIGAA e preserva manual;
 - resposta privada usa `Cache-Control: private, no-store`;
 - retenção remove metadados após 90 dias.
@@ -71,11 +73,12 @@ Casos obrigatórios:
 ## Validação real da beta
 
 1. Ativar `sigaa:beta` somente para a conta de teste.
-2. Conectar em staging isolado ou ambiente beta aprovado.
-3. Comparar cada grupo de dados com a tela oficial do SIGAA.
-4. Forçar uma falha após existir snapshot e verificar preservação.
-5. Fazer logout, entrar em outra conta e confirmar ausência de dados anteriores.
-6. Desconectar e depois excluir os importados, validando as diferenças.
-7. Inspecionar banco, logs e analytics em busca de dados proibidos.
+2. Conferir a descrição completa do snapshot e conectar em staging isolado ou ambiente beta aprovado.
+3. Comparar cada grupo de dados, incluindo notas, resultados e faltas, com a tela oficial do SIGAA.
+4. Conferir estados vazio, desconectado e erro, fechar a espera sem cancelar a tentativa e repetir uma sincronização.
+5. Forçar uma falha após existir snapshot e verificar preservação.
+6. Fazer logout, entrar em outra conta e confirmar ausência de dados anteriores.
+7. Desconectar e depois excluir os importados, validando as diferenças.
+8. Inspecionar banco, logs e analytics em busca de dados proibidos.
 
 Código verde sem esse smoke autenticado não conclui a beta.

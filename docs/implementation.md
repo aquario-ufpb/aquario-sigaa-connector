@@ -146,7 +146,7 @@ Trabalho:
 
 Prova estática: credenciais não aparecem em tipos de repositório ou logging.
 
-Prova runtime: mesma chave antes da rede, chaves concorrentes, lease vencido, resposta antiga tardia, matrícula nula, conflito de matrícula, curso desconhecido, proposta de troca de curso, proposta expirada ou superada, reautenticação de outra proposta, segunda consulta divergente, duas confirmações concorrentes com chaves diferentes e exatamente uma vencedora, resposta extra e timeout.
+Prova runtime: mesma chave antes da rede, chaves concorrentes, lease vencido, retry da confirmação com a mesma chave depois do lease, resposta antiga tardia, matrícula nula, conflito de matrícula, curso desconhecido, proposta de troca de curso, proposta expirada ou superada, reautenticação de outra proposta, segunda consulta divergente, duas confirmações concorrentes com chaves diferentes e exatamente uma vencedora, resposta extra e timeout.
 
 ## Fase 8. Expor sincronização e leitura privadas
 
@@ -195,7 +195,7 @@ Trabalho:
 
 - Combinar por código de disciplina sem mutar as fontes.
 - SIGAA vence apenas a apresentação de conflitos.
-- Preservar o valor manual e expor a origem.
+- Preservar o valor manual e expor a origem. Componentes manuais carregam sua própria identidade de disciplina e continuam visíveis depois de uma troca de curso, mesmo sem correspondência na grade atual.
 - Manter componentes SIGAA sem correspondência no catálogo visíveis na página privada.
 
 Prova estática: função pura e tipos discriminados por origem/estado.
@@ -213,15 +213,19 @@ Arquivos principais:
 Trabalho:
 
 - Exibir o card apenas ao dono beta, inclusive antes da primeira sincronização.
-- Criar consentimento, reautenticação, credenciais, progresso e resultado.
+- Criar consentimento informado que enumera os dados do snapshot, explica a preservação do último snapshot e informa a retenção de metadados seguros por 90 dias.
+- Criar reautenticação, credenciais, progresso e resultado.
+- Mostrar CRA, currículo, período, progresso, componentes, turmas, notas, exames, resultados, faltas e situações. Estados vazios distinguem ausência válida de erro de carregamento.
+- Agrupar e filtrar componentes para manter a página utilizável no celular. Mostrar o estado desconectado, retry de erro e uma ação para sincronizar novamente.
 - Em curso reconhecido e divergente, mostrar antes e depois, valor bruto do SIGAA e aviso irreversível. Exigir checkbox explícito, novas credenciais e nova senha do Aquário antes de confirmar. Voltar ao início quando a proposta expirar ou ficar obsoleta.
 - Manter senha e prova recente somente no estado transitório e limpar em `finally`.
 - Mostrar crédito e link para PucaVaz. Informar que senha não é persistida e que a sessão local fecha ao fim; não prometer logout remoto nem limpeza de RAM.
 - Informar que “parar de esperar” não garante cancelamento e pode durar até três minutos.
+- Permitir fechar o diálogo durante a espera sem prometer cancelamento. Manter a operação em andamento e atualizar o estado quando a resposta chegar.
 
-Prova estática: campos sensíveis com autocomplete adequado e exclusão de captura/analytics.
+Prova estática: campos sensíveis com autocomplete adequado. Card, diálogos e página acadêmica usam seletores reconhecidos pela versão instalada do PostHog para bloquear autocapture e session replay.
 
-Prova runtime: teste de navegador cobre dono, visitante, beta, consentimento, sucesso, erro, retry explícito e troca de conta.
+Prova runtime: teste de navegador cobre dono, visitante, beta, consentimento informado, sucesso, erro, retry explícito, estado desconectado, estados vazios, notas e resultados, fechar durante sincronização, foco e anúncio de erros, bloqueio de analytics e troca de conta.
 
 ## Fase 12. Retenção e ambientes
 
