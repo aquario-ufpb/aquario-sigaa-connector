@@ -22,7 +22,9 @@ O conector instala o projeto do PucaVaz por SHA completo. Nenhum parser será co
 - A chamada que contém senha SIGAA não usa o `apiClient` com retry automático.
 - Se o perfil já tem matrícula, a matrícula provada pelo SIGAA deve ser igual.
 - Se o perfil não tem matrícula, a matrícula provada é vinculada atomicamente ao instalar o primeiro snapshot.
-- Um curso divergente bloqueia a importação com mensagem segura. A comparação usa NFKC, caixa e espaços normalizados, mais uma lista explícita de aliases aprovados. Não existe comparação fuzzy nem alteração silenciosa do curso público.
+- A comparação de curso usa NFKC, caixa e espaços normalizados, mais uma lista explícita e versionada de aliases aprovados. Não existe comparação fuzzy nem alteração silenciosa do curso público.
+- Um curso reconhecido no catálogo, mas diferente do perfil, interrompe a sincronização e cria uma proposta temporária. A interface mostra curso e centro atuais, o valor bruto informado pelo SIGAA e o destino reconhecido. A substituição exige confirmação explícita, nova reautenticação vinculada à proposta e uma segunda consulta ao SIGAA antes do commit atômico.
+- Curso ausente do catálogo, alias desconhecido, proposta expirada ou identidade acadêmica alterada falham fechado sem modificar perfil, snapshot ou dados manuais.
 - O SIGAA vence conflitos apenas na leitura. Os registros manuais permanecem intactos.
 - Somente o último snapshot válido é mantido. Tentativas guardam metadados seguros por 90 dias.
 - Desconectar preserva o snapshot. Excluir dados importados remove conexão, snapshot e tentativas, sem tocar nos registros manuais.
@@ -45,6 +47,7 @@ O PDF de histórico usado pelo pacote para obter CRA permanece transitório em m
 7. O conector autentica, verifica a identidade primeiro e coleta os dados com um cliente exclusivo.
 8. O Aquário valida a resposta e instala o snapshot em uma transação curta.
 9. A leitura privada combina snapshot e dados manuais sem alterar nenhuma das fontes.
+10. Se o curso reconhecido divergir, o Aquário guarda somente uma proposta temporária, limpa as credenciais e pede confirmação. Uma nova consulta valida a mesma matrícula e o mesmo curso antes de substituir curso e centro e instalar o snapshot em uma única transação.
 
 ## Decisão de arquitetura
 

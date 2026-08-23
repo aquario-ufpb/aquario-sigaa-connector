@@ -4,13 +4,15 @@
 
 - Operação síncrona única.
 - Pydantic no conector e Zod no Aquário, alinhados por fixtures douradas.
-- Três conceitos persistidos: vínculo, último snapshot e tentativas seguras.
+- Quatro conceitos persistidos: vínculo, último snapshot, tentativas seguras e propostas temporárias de troca de curso.
 - JWT separado de reautenticação, finalidade SIGAA, duração de 15 minutos.
 - Bearer server-only sobre HTTPS.
 - SHA manual somente no `pyproject.toml`, revisão runtime derivada por PEP 610 ou pelo pin incluído no bundle Vercel.
 - Reserva de idempotência e lease com geração antes do I/O externo.
 
 Ela é adequada à beta porque não cria armazenamento de credencial, fila, polling, replay store, geração cruzada ou tabela adicional de concessões.
+
+A proposta de troca de curso não guarda credenciais nem o snapshot rejeitado. Ela vincula usuário, tentativa, token da identidade acadêmica exibida, matrícula esperada, valor bruto informado pelo SIGAA, curso de destino, token do catálogo de destino, versões de alias e consentimento, estado e expiração. O commit exige que a proposta ainda esteja pendente, que a reautenticação cite a mesma proposta e que uma segunda consulta ao SIGAA confirme a mesma identidade e o mesmo curso reconhecido. A substituição do perfil, a instalação do snapshot e a transição condicional da proposta de `PENDING` para `CONSUMED` acontecem na mesma transação. Somente uma confirmação concorrente pode vencer.
 
 O JWT pode ser reutilizado durante a janela de 15 minutos e o bearer pode ser repetido se vazar. A V1 aceita esses riscos com claims estritos, rate limit, memória apenas no navegador, segredo por ambiente, comparação constante e rotação documentada. Reautenticação de uso único e HMAC entram se o threat model ou a beta mostrarem necessidade concreta.
 

@@ -91,8 +91,9 @@ Arquivos principais:
 
 Trabalho:
 
-- Adicionar `SigaaConnection`, `SigaaAcademicSnapshot` e `SigaaSyncRun`.
+- Adicionar `SigaaConnection`, `SigaaAcademicSnapshot`, `SigaaSyncRun` e `SigaaCourseChangeProposal`.
 - Manter snapshot único por usuário, idempotência única, lease expirável com geração monotônica e códigos seguros.
+- Manter no máximo a proposta pendente efetiva por usuário. Vincular a proposta à tentativa inicial, token da identidade acadêmica exibida, matrícula esperada, valor bruto informado pelo SIGAA, curso de destino, token do catálogo de destino, versões de alias e consentimento e expiração curta. Não guardar credenciais nem o snapshot rejeitado.
 - Não criar campos para senha, cookie, HTML, PDF, ViewState ou erro bruto.
 - Criar índices para usuário, idempotência, lease e expiração de 90 dias.
 
@@ -138,12 +139,14 @@ Trabalho:
 - Fazer a chamada fora da transação.
 - Construir metadados da tentativa no Aquário a partir de relógio, outcome mapeado, contagens validadas, versão e revisão. O conector não retorna `safeMetadata`.
 - Gerar `synchronizedAt` pelo relógio do banco no commit e devolvê-lo na leitura privada.
-- Comparar `student.course` com `Usuario.curso.nome` por normalização determinística e aliases versionados. Valor desconhecido ou divergente falha fechado.
+- Comparar `student.course` com `Usuario.curso.nome` por normalização determinística e aliases versionados.
+- Valor ausente do catálogo ou alias desconhecido falha fechado. Curso reconhecido, mas diferente do perfil, encerra a tentativa sem instalar o snapshot e devolve uma proposta temporária com curso e centro atuais, valor bruto do SIGAA e destino reconhecido.
+- Confirmar a proposta em uma operação separada. Exigir nova reautenticação com claim assinado que cite o ID exato da proposta, novas credenciais SIGAA, nova idempotency key e uma segunda consulta. O commit atômico substitui curso e centro, instala o snapshot e move condicionalmente a proposta de `PENDING` para `CONSUMED` somente se proposta, identidade acadêmica, matrícula, alias, consentimento e destino continuarem válidos. Confirmações concorrentes com chaves diferentes disputam a mesma transição e exatamente uma vence.
 - Preservar o snapshot anterior em qualquer falha.
 
 Prova estática: credenciais não aparecem em tipos de repositório ou logging.
 
-Prova runtime: mesma chave antes da rede, chaves concorrentes, lease vencido, resposta antiga tardia, matrícula nula, conflito de matrícula, curso divergente, resposta extra e timeout.
+Prova runtime: mesma chave antes da rede, chaves concorrentes, lease vencido, retry da confirmação com a mesma chave depois do lease, resposta antiga tardia, matrícula nula, conflito de matrícula, curso desconhecido, proposta de troca de curso, proposta expirada ou superada, reautenticação de outra proposta, segunda consulta divergente, duas confirmações concorrentes com chaves diferentes e exatamente uma vencedora, resposta extra e timeout.
 
 ## Fase 8. Expor sincronização e leitura privadas
 
@@ -192,7 +195,7 @@ Trabalho:
 
 - Combinar por código de disciplina sem mutar as fontes.
 - SIGAA vence apenas a apresentação de conflitos.
-- Preservar o valor manual e expor a origem.
+- Preservar o valor manual e expor a origem. Componentes manuais carregam sua própria identidade de disciplina e continuam visíveis depois de uma troca de curso, mesmo sem correspondência na grade atual.
 - Manter componentes SIGAA sem correspondência no catálogo visíveis na página privada.
 
 Prova estática: função pura e tipos discriminados por origem/estado.
@@ -210,14 +213,20 @@ Arquivos principais:
 Trabalho:
 
 - Exibir o card apenas ao dono beta, inclusive antes da primeira sincronização.
-- Criar consentimento, reautenticação, credenciais, progresso e resultado.
+- Criar consentimento informado que enumera os dados do snapshot, explica a preservação do último snapshot e informa a retenção de metadados seguros por 90 dias.
+- Criar reautenticação, credenciais, progresso e resultado.
+- Mostrar CRA, currículo, período, progresso, componentes, turmas, notas, exames, resultados, faltas e situações. Estados vazios distinguem ausência válida de erro de carregamento.
+- Agrupar e filtrar componentes para manter a página utilizável no celular. Mostrar o estado desconectado, retry de erro e uma ação para sincronizar novamente.
+- Em curso reconhecido e divergente, mostrar antes e depois, valor bruto do SIGAA e aviso irreversível. Exigir checkbox explícito, novas credenciais e nova senha do Aquário antes de confirmar. Voltar ao início quando a proposta expirar ou ficar obsoleta.
 - Manter senha e prova recente somente no estado transitório e limpar em `finally`.
 - Mostrar crédito e link para PucaVaz. Informar que senha não é persistida e que a sessão local fecha ao fim; não prometer logout remoto nem limpeza de RAM.
 - Informar que “parar de esperar” não garante cancelamento e pode durar até três minutos.
+- Permitir fechar o diálogo durante a espera sem prometer cancelamento. Manter a operação em andamento e atualizar o estado quando a resposta chegar.
+- Medir abertura, início, sucesso, falha, proposta de troca de curso, confirmação, nova sincronização, desconexão e exclusão com eventos tipados. As propriedades ficam limitadas a enums e booleanos. Não enviar identidade SIGAA, matrícula, curso, componentes, notas, contagens, mensagem de erro ou credenciais.
 
-Prova estática: campos sensíveis com autocomplete adequado e exclusão de captura/analytics.
+Prova estática: campos sensíveis com autocomplete adequado. Card, diálogos e página acadêmica usam seletores reconhecidos pela versão instalada do PostHog para bloquear autocapture e session replay. A união tipada de eventos impede propriedades acadêmicas livres.
 
-Prova runtime: teste de navegador cobre dono, visitante, beta, consentimento, sucesso, erro, retry explícito e troca de conta.
+Prova runtime: teste de navegador cobre dono, visitante, beta, consentimento informado, sucesso, erro, retry explícito, estado desconectado, estados vazios, notas e resultados, fechar durante sincronização, foco e anúncio de erros, bloqueio de analytics e troca de conta.
 
 ## Fase 12. Retenção e ambientes
 
@@ -232,6 +241,7 @@ Trabalho:
 - Excluir diariamente tentativas com mais de 90 dias.
 - Não fornecer segredo de conector nem acesso SIGAA real a previews.
 - Impedir que o reset de staging copie snapshots acadêmicos de produção. Usar base isolada ou limpeza obrigatória antes do acesso.
+- Fazer o workflow falhar se não resolver o deployment exato ou se a API da Vercel não confirmar o alias de staging.
 - Validar os tetos de 150, 165 e 180 segundos no plano e região dos dois serviços. Hard kill pode impedir `finally`; a promessa pública continua limitada a não persistir nem reutilizar credenciais/sessão.
 
 Prova estática: ambientes têm política explícita de segredos e dados.
