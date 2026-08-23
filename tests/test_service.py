@@ -19,6 +19,23 @@ USERNAME = "20260000001"
 PASSWORD = "private-password"
 
 
+def test_default_provider_uses_a_longer_read_timeout(monkeypatch):
+    captured: dict[str, object] = {}
+
+    class CapturingClient:
+        def __init__(self, username: str, password: str, **kwargs: object) -> None:
+            captured.update(username=username, password=password, **kwargs)
+
+    monkeypatch.setattr(service, "SigaaClient", CapturingClient)
+
+    service._create_sigaa_client(USERNAME, PASSWORD)
+
+    timeout = captured["timeout"]
+    assert isinstance(timeout, httpx.Timeout)
+    assert timeout.connect == 10.0
+    assert timeout.read == 60.0
+
+
 def _student(*, matricula: object = USERNAME, name: object = "Ralf") -> SimpleNamespace:
     return SimpleNamespace(
         matricula=matricula,
