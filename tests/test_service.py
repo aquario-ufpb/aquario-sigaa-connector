@@ -30,6 +30,8 @@ def test_default_provider_uses_a_longer_read_timeout(monkeypatch):
 
     service._create_sigaa_client(USERNAME, PASSWORD)
 
+    assert captured["username"] == USERNAME
+    assert captured["password"] == PASSWORD
     timeout = captured["timeout"]
     assert isinstance(timeout, httpx.Timeout)
     assert timeout.connect == 10.0
