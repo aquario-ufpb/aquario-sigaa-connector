@@ -31,6 +31,12 @@ from .contracts import (
 from .errors import ConnectorError, FailureKind
 from .provenance import ProvenanceError, UpstreamProvenance, read_upstream_provenance
 
+SIGAA_HTTP_TIMEOUT = httpx.Timeout(60.0, connect=10.0)
+
+
+def _create_sigaa_client(username: str, password: str) -> SigaaClient:
+    return SigaaClient(username, password, timeout=SIGAA_HTTP_TIMEOUT)
+
 
 @dataclass(frozen=True, slots=True)
 class SyncCommand:
@@ -47,7 +53,7 @@ class PucaVazSyncProvider:
     def __init__(
         self,
         *,
-        client_factory: Callable[[str, str], Any] = SigaaClient,
+        client_factory: Callable[[str, str], Any] = _create_sigaa_client,
         provenance: UpstreamProvenance | None = None,
         clock: Callable[[], datetime] | None = None,
     ) -> None:
