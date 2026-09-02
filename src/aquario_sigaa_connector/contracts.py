@@ -7,7 +7,7 @@ from typing import Annotated, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator, model_validator
 
-UPSTREAM_REPOSITORY = "https://github.com/PucaVaz/sigaa-for-ai-agents.git"
+UPSTREAM_REPOSITORY = "https://github.com/PucaVaz/sigaa-tools.git"
 
 Username = Annotated[str, Field(min_length=1, max_length=64)]
 Password = Annotated[SecretStr, Field(min_length=1, max_length=256)]
@@ -46,12 +46,10 @@ class SyncRequest(StrictModel):
 
 class SourceInfo(StrictModel):
     system: Annotated[Literal["SIGAA_UFPB"], Field(min_length=10, max_length=10)] = "SIGAA_UFPB"
-    adapter: Annotated[Literal["sigaa-for-ai-agents"], Field(min_length=19, max_length=19)] = (
-        "sigaa-for-ai-agents"
-    )
+    adapter: Annotated[Literal["sigaa-tools"], Field(min_length=11, max_length=11)] = "sigaa-tools"
     upstream_repository: Annotated[
-        Literal["https://github.com/PucaVaz/sigaa-for-ai-agents.git"],
-        Field(min_length=50, max_length=50),
+        Literal["https://github.com/PucaVaz/sigaa-tools.git"],
+        Field(min_length=42, max_length=42),
     ] = UPSTREAM_REPOSITORY
     upstream_commit: CommitId
 

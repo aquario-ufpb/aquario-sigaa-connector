@@ -41,7 +41,7 @@ from aquario_sigaa_connector.provenance import read_upstream_provenance  # noqa:
 
 _FULL_SHA = re.compile(r"(?<![0-9a-f])[0-9a-f]{40}(?![0-9a-f])")
 _PIN = re.compile(
-    r"^sigaa-ai-agent\s*@\s*git\+(?P<repository>https://[^@]+)@(?P<commit>[0-9a-f]{40})$"
+    r"^sigaa-tools\s*@\s*git\+(?P<repository>https://[^@]+)@(?P<commit>[0-9a-f]{40})$"
 )
 _IGNORED_PARTS = {".audit", ".git", ".pytest_cache", ".ruff_cache", ".venv", "__pycache__"}
 

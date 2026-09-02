@@ -2,7 +2,7 @@
 
 Este serviço conecta o backend do Aquário ao Sistema Integrado de Gestão de Atividades Acadêmicas (SIGAA) da Universidade Federal da Paraíba (UFPB). Ele autentica uma requisição privada, consulta os dados acadêmicos e devolve um snapshot normalizado sem armazenar credenciais, cookies, HTML ou arquivos PDF.
 
-Este conector utiliza o projeto [`sigaa-for-ai-agents`](https://github.com/PucaVaz/sigaa-for-ai-agents), criado por [Puca Vaz](https://github.com/PucaVaz), como base para autenticação, navegação e interpretação dos dados do SIGAA.
+Este conector utiliza o projeto [`sigaa-tools`](https://github.com/PucaVaz/sigaa-tools), criado por [Puca Vaz](https://github.com/PucaVaz), como base para autenticação, navegação e interpretação dos dados do SIGAA.
 
 > [!IMPORTANT]
 > Esta integração não é oficial e não possui vínculo, suporte ou endosso da UFPB ou do SIGAA.
@@ -18,7 +18,7 @@ O serviço ainda exige um teste de inicialização válido no ambiente Vercel an
 O conector possui uma fronteira pequena e deliberada:
 
 - recebe credenciais SIGAA somente em `POST /v1/sync`
-- usa o `SigaaClient` do projeto `sigaa-for-ai-agents`
+- usa o `SigaaClient` do projeto `sigaa-tools`
 - valida a matrícula antes de consultar os demais dados
 - normaliza perfil, currículo, Coeficiente de Rendimento Acadêmico (CRA), notas e turmas
 - encerra a sessão local após sucesso ou erro ordinário
@@ -41,7 +41,7 @@ tests/                       Testes unitários e testes HTTP sobre ASGI
 
 ## Dependência upstream
 
-O projeto não copia parsers ou regras de navegação do SIGAA. Ele instala [`sigaa-for-ai-agents`](https://github.com/PucaVaz/sigaa-for-ai-agents), criado por Puca Vaz, diretamente do GitHub por um commit completo fixado em `pyproject.toml`.
+O projeto não copia parsers ou regras de navegação do SIGAA. Ele instala [`sigaa-tools`](https://github.com/PucaVaz/sigaa-tools), criado por Puca Vaz, diretamente do GitHub por um commit completo fixado em `pyproject.toml`.
 
 O ambiente de execução lê a revisão instalada pelos metadados da [Python Enhancement Proposal (PEP) 610](https://peps.python.org/pep-0610/). Quando a Vercel remove esse metadado do bundle, o conector deriva a mesma revisão do `pyproject.toml` incluído na função. O verificador arquitetural rejeita divergências, URLs alternativas e imports diretos de `sigaa.parsers`.
 
@@ -139,4 +139,4 @@ Relate uma vulnerabilidade diretamente aos mantenedores do Aquário. Não publiq
 
 ## Licenças
 
-O código deste repositório usa a licença MIT disponível em [LICENSE](LICENSE). A licença da dependência upstream está preservada em [licenses/sigaa-for-ai-agents-MIT.txt](licenses/sigaa-for-ai-agents-MIT.txt).
+O código deste repositório usa a licença MIT disponível em [LICENSE](LICENSE). A licença da dependência upstream está preservada em [licenses/sigaa-tools-MIT.txt](licenses/sigaa-tools-MIT.txt).

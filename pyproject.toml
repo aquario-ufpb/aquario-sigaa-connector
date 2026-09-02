@@ -14,7 +14,7 @@ dependencies = [
   "fastapi>=0.116,<1",
   "httpx>=0.27,<1",
   "pydantic>=2.11,<3",
-  "sigaa-ai-agent @ git+https://github.com/PucaVaz/sigaa-for-ai-agents.git@b246ca5ceaf11fe2a1d4ed433be470ad3b695863",
+  "sigaa-tools @ git+https://github.com/PucaVaz/sigaa-tools.git@bd9e4efd60becb706d9cc455c784bce49b027435",
 ]
 
 [project.optional-dependencies]

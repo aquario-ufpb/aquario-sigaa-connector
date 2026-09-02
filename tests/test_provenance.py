@@ -28,10 +28,10 @@ def test_installed_provenance_uses_canonical_git_repository_and_full_commit():
 
 def test_provenance_falls_back_to_installed_project_dependency(monkeypatch):
     commit = "a" * 40
-    dependency = f"sigaa-ai-agent @ git+{UPSTREAM_REPOSITORY}@{commit}"
+    dependency = f"sigaa-tools @ git+{UPSTREAM_REPOSITORY}@{commit}"
 
     def fake_distribution(name: str):
-        if name == "sigaa-ai-agent":
+        if name == "sigaa-tools":
             return FakeDistribution(None)
         return FakeDistribution(None, requirements=[dependency])
 

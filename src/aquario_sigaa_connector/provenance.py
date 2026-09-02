@@ -12,12 +12,12 @@ from typing import Any
 
 from .contracts import UPSTREAM_REPOSITORY
 
-UPSTREAM_DISTRIBUTION = "sigaa-ai-agent"
+UPSTREAM_DISTRIBUTION = "sigaa-tools"
 PROJECT_DISTRIBUTION = "aquario-sigaa-connector"
 PROJECT_CONFIG = Path(__file__).resolve().parents[2] / "pyproject.toml"
 _FULL_COMMIT = re.compile(r"^[0-9a-f]{40}$")
 _PINNED_DEPENDENCY = re.compile(
-    r"^sigaa-ai-agent\s*@\s*git\+(?P<repository>https://[^@]+)@(?P<commit>[0-9a-f]{40})$"
+    r"^sigaa-tools\s*@\s*git\+(?P<repository>https://[^@]+)@(?P<commit>[0-9a-f]{40})$"
 )
 
 

@@ -10,7 +10,7 @@ O dono do perfil conecta sua conta SIGAA, autoriza uma importação privada e v�
 | --- | --- |
 | Aquário | Identidade, beta, consentimento, reautenticação, rate limit, persistência, conflito entre fontes e interface privada |
 | `aquario-sigaa-connector` | Ponte HTTP, contrato estrito, sessão efêmera, normalização e erros seguros |
-| `PucaVaz/sigaa-for-ai-agents` | Login, navegação JSF, cookies, requisições SIGAA e parsers |
+| `PucaVaz/sigaa-tools` | Login, navegação JSF, cookies, requisições SIGAA e parsers |
 
 O conector instala o projeto do PucaVaz por SHA completo. Nenhum parser será copiado. README, `THIRD_PARTY_NOTICES.md`, licença upstream e interface devem creditar Puca Vaz e apontar para o repositório original.
 
