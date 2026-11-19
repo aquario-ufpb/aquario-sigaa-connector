@@ -172,6 +172,17 @@ class ClassData(StrictModel):
     semester: NullableShortText
 
 
+class DeadlineData(StrictModel):
+    id: ShortText
+    kind: ShortText
+    title: MediumText
+    date: Annotated[str, Field(min_length=0, max_length=256)]
+
+
+class ClassWithDeadlines(ClassData):
+    deadlines: Annotated[list[DeadlineData], Field(min_length=0, max_length=256)]
+
+
 class SyncResponse(StrictModel):
     schema_version: Annotated[Literal["1.0"], Field(min_length=3, max_length=3)] = "1.0"
     observed_at: datetime
@@ -179,7 +190,7 @@ class SyncResponse(StrictModel):
     student: StudentData
     curriculum: CurriculumV1
     grades: Annotated[list[GradeData], Field(min_length=0, max_length=256)]
-    classes: Annotated[list[ClassData], Field(min_length=0, max_length=64)]
+    classes: Annotated[list[ClassWithDeadlines | ClassData], Field(min_length=0, max_length=64)]
 
 
 class HealthResponse(StrictModel):

@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Protocol
+from typing import Annotated, Protocol
 from uuid import uuid4
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, FastAPI, Header, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
@@ -133,12 +133,16 @@ def create_app(
         response_model=SyncResponse,
         dependencies=[Depends(require_connector_auth)],
     )
-    async def sync(request: SyncRequest) -> SyncResponse:
+    async def sync(
+        request: SyncRequest,
+        x_aquario_sigaa_deadlines: Annotated[str | None, Header()] = None,
+    ) -> SyncResponse:
         return await active_executor.execute(
             SyncCommand(
                 username=request.username,
                 password=request.password,
                 expected_matricula=request.expected_matricula,
+                include_deadlines=x_aquario_sigaa_deadlines == "1",
             )
         )
 

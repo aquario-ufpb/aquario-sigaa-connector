@@ -109,6 +109,8 @@ O corpo de sincronização usa este formato:
 
 Use `null` em `expected_matricula` somente quando o perfil do Aquário ainda não possuir matrícula. Quando presente, o conector compara esse valor antes de buscar currículo, notas ou turmas.
 
+O backend pode enviar o cabeçalho `X-Aquario-Sigaa-Deadlines: 1` para receber o campo `deadlines` em cada turma. Cada evento traz `id`, `kind`, `title` e `date`. O texto da data vem do portal e pode estar vazio. Uma turma sem eventos recebe uma lista vazia. O conector lê os eventos da página de turmas já carregada. Os clientes que omitem o cabeçalho recebem a resposta V1 original.
+
 Todas as respostas incluem `Cache-Control: no-store`, `Pragma: no-cache`, `X-Content-Type-Options: nosniff` e um `X-Request-ID` gerado pelo servidor.
 
 ## Executar os gates

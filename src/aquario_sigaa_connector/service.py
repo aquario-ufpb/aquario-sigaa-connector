@@ -21,13 +21,16 @@ from sigaa.errors import (
     UnsafeUrlError,
 )
 from sigaa.http import AuthError
+from sigaa.models import Deadline, Turma
 
 from .contracts import (
     ClassData,
+    ClassWithDeadlines,
     CraV1,
     CurriculumComponentV1,
     CurriculumCountsV1,
     CurriculumV1,
+    DeadlineData,
     GradeData,
     SemesterWorkloadV1,
     SourceInfo,
@@ -50,6 +53,7 @@ class SyncCommand:
     username: str
     password: SecretStr
     expected_matricula: str | None
+    include_deadlines: bool = False
 
 
 class _SyncProvider(Protocol):
@@ -90,7 +94,9 @@ class PucaVazSyncProvider:
                     student=student_data,
                     curriculum=curriculum,
                     grades=grades,
-                    classes=classes,
+                    classes=_class_data(
+                        classes, client.list_deadlines() if command.include_deadlines else None
+                    ),
                 )
         except ConnectorError:
             raise
@@ -129,7 +135,7 @@ class PucaVazSyncProvider:
         student: StudentData,
         curriculum: Any,
         grades: Any,
-        classes: Any,
+        classes: list[ClassData | ClassWithDeadlines],
     ) -> SyncResponse:
         components = [
             CurriculumComponentV1(
@@ -193,18 +199,33 @@ class PucaVazSyncProvider:
                 )
                 for item in grades
             ],
-            classes=[
-                ClassData(
-                    source_key=item.id_turma,
-                    name=item.name,
-                    code=item.code,
-                    room=item.room,
-                    schedule_raw=item.schedule_raw,
-                    semester=item.semester,
-                )
-                for item in classes
-            ],
+            classes=classes,
         )
+
+
+def _class_data(
+    classes: list[Turma], deadlines: list[Deadline] | None
+) -> list[ClassData | ClassWithDeadlines]:
+    by_class: dict[str, list[DeadlineData]] = {}
+    for event in deadlines or []:
+        by_class.setdefault(event.id_turma, []).append(
+            DeadlineData(id=event.id, kind=event.kind, title=event.title, date=event.date)
+        )
+    result = []
+    for turma in classes:
+        fields = {
+            "source_key": turma.id_turma,
+            "name": turma.name,
+            "code": turma.code,
+            "room": turma.room,
+            "schedule_raw": turma.schedule_raw,
+            "semester": turma.semester,
+        }
+        if deadlines is None:
+            result.append(ClassData(**fields))
+        else:
+            result.append(ClassWithDeadlines(**fields, deadlines=by_class.get(turma.id_turma, [])))
+    return result
 
 
 def _required_identity(value: object) -> str:
