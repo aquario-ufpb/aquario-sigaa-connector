@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime
 from decimal import Decimal
 from types import SimpleNamespace
@@ -18,6 +19,7 @@ from sigaa.errors import (
 from sigaa.http import AuthError
 
 from aquario_sigaa_connector import service
+from aquario_sigaa_connector.app import create_app
 from aquario_sigaa_connector.errors import ConnectorError, FailureKind
 from aquario_sigaa_connector.provenance import ProvenanceError
 from aquario_sigaa_connector.service import PucaVazSyncProvider, SyncCommand
@@ -187,6 +189,51 @@ def test_provider_validates_identity_first_and_builds_complete_response(expected
     assert response.curriculum.progress[0].remaining_hours == 1200
     assert response.curriculum.counts.pending_required == 1
     assert PASSWORD not in response.model_dump_json()
+
+
+@pytest.mark.parametrize("header", [None, "0", "1"])
+def test_http_class_deadlines_require_opt_in_and_match_the_class(header, monkeypatch):
+    class CalendarClient(FakeClient):
+        def list_turmas(self):
+            other = _class()
+            other.id_turma = "456"
+            return [_class(), other]
+
+        def list_deadlines(self):
+            assert header == "1"
+            return [
+                SimpleNamespace(id_turma="123", id="a", kind="avaliacao", title="Prova", date=""),
+                SimpleNamespace(
+                    id_turma="other", id="b", kind="tarefa", title="Outro trabalho", date="19/05"
+                ),
+            ]
+
+    secret = "x" * 32
+    monkeypatch.setenv("CONNECTOR_API_SECRET", secret)
+    headers = {"Authorization": f"Bearer {secret}"}
+    if header is not None:
+        headers["X-Aquario-Sigaa-Deadlines"] = header
+    application = create_app(provider=_provider(CalendarClient([])))
+
+    async def request():
+        transport = httpx.ASGITransport(app=application)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            return await client.post(
+                "/v1/sync", headers=headers, json={"username": USERNAME, "password": PASSWORD}
+            )
+
+    response = asyncio.run(request())
+    application.state.sync_executor.shutdown()
+    assert response.status_code == 200
+    first, second = response.json()["classes"]
+    if header == "1":
+        assert first["deadlines"] == [
+            {"id": "a", "kind": "avaliacao", "title": "Prova", "date": ""}
+        ]
+        assert second["deadlines"] == []
+    else:
+        assert "deadlines" not in first
+        assert "deadlines" not in second
 
 
 @pytest.mark.parametrize(
