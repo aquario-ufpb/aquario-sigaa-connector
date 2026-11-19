@@ -8,6 +8,13 @@ import httpx
 import pytest
 from pydantic import SecretStr
 from sigaa.documents import AcademicDocumentError
+from sigaa.errors import (
+    CaptchaError,
+    LoginRejectedError,
+    MissingCredentialsError,
+    UnrecognizedPageError,
+    UnsafeUrlError,
+)
 from sigaa.http import AuthError
 
 from aquario_sigaa_connector import service
@@ -219,7 +226,11 @@ def test_identity_mismatch_stops_collection_and_closes_client():
     ("failure", "kind"),
     [
         (AuthError("expired"), FailureKind.SIGAA_AUTH_FAILED),
-        (ValueError("login failed (check credentials / CAPTCHA)"), FailureKind.SIGAA_AUTH_FAILED),
+        (LoginRejectedError("rejected"), FailureKind.SIGAA_AUTH_FAILED),
+        (MissingCredentialsError("unsupported credentials"), FailureKind.SIGAA_AUTH_FAILED),
+        (CaptchaError("unsupported challenge"), FailureKind.SIGAA_UNAVAILABLE),
+        (UnsafeUrlError("http", "test.invalid", None, "blocked"), FailureKind.SIGAA_UNAVAILABLE),
+        (UnrecognizedPageError("login", {}), FailureKind.SIGAA_RESPONSE_INVALID),
         (httpx.ReadTimeout("slow"), FailureKind.SIGAA_TIMEOUT),
         (httpx.ConnectError("down"), FailureKind.SIGAA_UNAVAILABLE),
         (ValueError("unexpected HTML"), FailureKind.SIGAA_RESPONSE_INVALID),

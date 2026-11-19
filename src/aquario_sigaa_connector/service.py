@@ -13,6 +13,13 @@ import httpx
 from pydantic import SecretStr, ValidationError
 from sigaa.client import SigaaClient
 from sigaa.documents import AcademicDocumentError
+from sigaa.errors import (
+    CaptchaError,
+    LoginRejectedError,
+    MissingCredentialsError,
+    ParseError,
+    UnsafeUrlError,
+)
 from sigaa.http import AuthError
 
 from .contracts import (
@@ -87,22 +94,20 @@ class PucaVazSyncProvider:
                 )
         except ConnectorError:
             raise
-        except AuthError as exc:
+        except (AuthError, LoginRejectedError, MissingCredentialsError) as exc:
             raise ConnectorError(FailureKind.SIGAA_AUTH_FAILED) from exc
         except httpx.TimeoutException as exc:
             raise ConnectorError(FailureKind.SIGAA_TIMEOUT) from exc
-        except httpx.HTTPError as exc:
+        except (httpx.HTTPError, CaptchaError, UnsafeUrlError) as exc:
             raise ConnectorError(FailureKind.SIGAA_UNAVAILABLE) from exc
-        except AcademicDocumentError as exc:
-            raise ConnectorError(FailureKind.SIGAA_RESPONSE_INVALID) from exc
-        except ValueError as exc:
-            kind = (
-                FailureKind.SIGAA_AUTH_FAILED
-                if str(exc).startswith("login failed")
-                else FailureKind.SIGAA_RESPONSE_INVALID
-            )
-            raise ConnectorError(kind) from exc
-        except (AttributeError, KeyError, TypeError, ValidationError) as exc:
+        except (
+            AcademicDocumentError,
+            ParseError,
+            AttributeError,
+            KeyError,
+            TypeError,
+            ValueError,
+        ) as exc:
             raise ConnectorError(FailureKind.SIGAA_RESPONSE_INVALID) from exc
 
     def _installed_provenance(self) -> UpstreamProvenance:
